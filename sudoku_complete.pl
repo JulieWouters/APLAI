@@ -11,6 +11,8 @@ convert(Board,GoodBoard) :-
     ),
     array_list(GoodBoard,GoodList).
 
+solve(BoardList,B) :- solve([],BoardList,B).
+solve([],BoardList,B) :- solve([new,original],BoardList,B).
 solve(Options,BoardList,B) :-
     convert(BoardList,Board),
     sudoku(Board,Vboard,Rboard,Cboard,B, Options), 
