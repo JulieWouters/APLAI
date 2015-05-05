@@ -3,16 +3,16 @@
 :- import occurrences/3 from ic_global.
 :- import nth1/3 from listut.
 
-solve(ProblemName) :-
+solve(ProblemName,B) :-
 	problem(ProblemName,Hint,Rows,Cols),
-	battleship(Board,Hint,Rows,Cols),
+	battleship(Board,Hint,Rows,Cols,B),
 	print_board(Board).
 	
-battleship(Board,Hint,Rows,Cols) :-
+battleship(Board,Hint,Rows,Cols,B) :-
 	length(Rows,Lr),
 	length(Cols,Lc),
 	dim(Board,[Lr,Lc]),
-	Board[1..Lr,1..Lc] :: 0..6,
+	Board[1..Lr,1..Lc] :: 0..4,
 	process_hint(Hint,Board),
 	(for(I,1,Lr), param(Board,Rows,Cols,Lc,Lr) do
 		Row is Board[I,1..Lc],
@@ -30,17 +30,35 @@ battleship(Board,Hint,Rows,Cols) :-
 			V2 is Board[A+1,B+1],
 			#>(V1,0,B1),
 			#>(V2,0,B2),
-			B1 + B2 #= 1,
+			#=<(B1+B2,1,1),
 			V3 is Board[A+1,B],
 			V4 is Board[A,B+1],
 			#>(V3,0,B3),
 			#>(V4,0,B4),
-			B3 + B4 #= 1
+			#=<(B3+B4,1,1),
+			V5 is Board[A,B+1],
+			V6 is Board[A+1,B],
+			#=(V1,V5,C),
+			#=(V1,0,D),
+			#=(V5,0,E),
+			C + D + E #>= 1,
+			#=(V1,V6,F),
+			#=(V1,0,G),
+			#=(V6,0,H),
+			F + G + H #>= 1
 		)
 	),
+	Block is Board[1..Lr,1..Lc],
+	flatten(Block,BoardList),
+	occurrences(1,BoardList,4),
+	occurrences(2,BoardList,6),
+	occurrences(3,BoardList,6),
+	occurrences(4,BoardList,4),
+	search(Board,0,first_fail,indomain,complete,[backtrack(B)]).
+	/**
 	term_variables(Board, Vars),
 	labeling(Vars).
-	
+	*/
 print_board(Board) :- 
 	dim(Board, [W,H]),
 	( for(I,1,H), param(Board,W) do 
