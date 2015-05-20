@@ -33,7 +33,6 @@ constraints(Board,Vboard,Rboard,Cboard,Options) :-
 	Rboard :: [1..9],
 	Cboard :: [1..9],
   (member(original,Options) -> 
-    channel(Board,Vboard),
     constraints_original(Board)
     ;
     true
