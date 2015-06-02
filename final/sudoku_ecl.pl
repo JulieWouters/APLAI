@@ -1,5 +1,6 @@
 :-lib(ic).
 :-lib(listut).
+:-compile("sudokus").
 
 convert(Board,GoodBoard) :-
     (for(I,0,8), 
@@ -12,27 +13,20 @@ convert(Board,GoodBoard) :-
     ),
     array_list(GoodBoard,GoodList).
 
-get_statistics(Options) :-
-  (for(I,1,18), param(Options) do
-    puzzles(P,I),
-    solve(Options,P,B),
-    writeln(B)).
-
-solve(P,B) :- solve([],P,B).
-solve([],P,B) :- solve([new,original],P,B).
-solve(Options,P,B) :-
+solve(P,B,Method) :- solve([],P,B,Method).
+solve([],P,B, Method) :- solve([new,original],P,B, Method).
+solve(Options,P,B, Method) :-
     puzzles(BoardList,P),
     convert(BoardList,Board),
-    sudoku(Board,Rboard,B, Options), 
-   print_board(Board), writeln(" "), print_board(Rboard).
+    sudoku(Board,Rboard,B, Options, Method), 
+    print_board(Board).
 
-sudoku(Board,Rboard, B,Options) :-
+sudoku(Board,Rboard, B,Options, Method) :-
     constraints(Board,Rboard,Options),
-    %search(Board),
     (member(new,Options) -> 
-      ic:search(Rboard,0,input_order,indomain,complete,[backtrack(B)])
+      ic:search(Rboard,0,Method,indomain,complete,[backtrack(B)])
       ;
-      ic:search(Board,0,input_order,indomain,complete,[backtrack(B)])
+      ic:search(Board,0,Method,indomain,complete,[backtrack(B)])
     ).
 
 constraints(Board,Rboard,Options) :-

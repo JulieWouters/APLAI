@@ -1,0 +1,29 @@
+How to run the Sudoku solutions
+---------------------------------
+
+In ECLiPSe:
+
+All solutions are contained in the "sudoku_ecl.pl" file.
+Use the predicate solve(P,B,Method) to solve a specific given puzzle P 
+(P can be either the name of a puzzle or a number going from 1 to 18).
+B is the amount of backtracks needed to solve the puzzle
+and Method is the heuristic used (first_fail, input_order, occurrence or most_constrained).
+This predicate is used to obtain the solution with channeling.
+When you want to get the solution using the original/new viewpoint,
+you can use the predicate solve([original],P,B) or solve([new],P,B), respectively.
+
+The sudoku solution will be printed.
+
+In CHR:
+
+Solution with original viewpoint is in "sudoku_chr_or.pl",
+solution with new viewpoint is in "sudoku_chr_new.pl"
+and solution with channeling is in "sudoku_chr_chan.pl".
+
+In all these files, use the predicate solve(P,firstfail) to use the first fail heuristic
+and solve(P,inputorder) to use the input order heuristic.
+Again, P can be either the name or number of a puzzle.
+
+The predicate solve solves all puzzles after each other (using firstfail).
+
+The sudoku solution will be printed (as well as the backtracks, represented by the amount of B's).
