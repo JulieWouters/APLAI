@@ -27,3 +27,17 @@ Again, P can be either the name or number of a puzzle.
 The predicate solve solves all puzzles after each other (using firstfail).
 
 The sudoku solution will be printed (as well as the backtracks, represented by the amount of B's).
+
+
+How to run the Battleship solutions
+-------------------------------------
+
+In ECLiPSe:
+
+The main solution can be found in "battleship_ecl.pl", along with four puzzles. (1, 13, 15, 35)
+To run the solver, use the command "solve(P,B)", where P stands for the puzzle you wish to solve
+and B the number of backtracks. (example: solve(35,B) will solve puzzle 35)
+In order to not use the hints, the line "process_hint(Hint,Nboard)," (line 46) will have to be put in comments. 
+
+As soon as you run the command the solver will start looking for a solution.
+Depending on how long it takes to find a solution it will print the solution.
