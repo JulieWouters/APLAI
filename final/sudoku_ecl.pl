@@ -45,8 +45,6 @@ constraints(Board,Rboard,Options) :-
     ;
     true
   ).
-  %channel(Rboard,Rboard,Cboard),
-	%constraints(Rboard,Cboard).
 	
 constraints_original(Board) :- %constraints for the original viewpoint
   (for(I,1,9), param(Board) do 
@@ -62,23 +60,6 @@ constraints_original(Board) :- %constraints for the original viewpoint
     %new_constraints(BlockList,I,J,Board)
   ).
 
-/*
-new_constraints(Block,I,J,Board) :-
-  Row is Board[I,1..9],
-  J1 is J+1,
-  J2 is J+2,
-  RowList = [],
-  for(I,1,9), param(Row,J,List) do
-    (I \= J, I \= J1, I \= J2 ->
-      (get_domain_as_list(I,VarList),
-      append(RowList,VarList,List2),
-      RowList = List2)
-      ;
-      true
-    )
-  BlockList is Block[]
-*/
-
 %constraints for our new viewpoint
 constraints_new(Rboard) :-
   (for(I,1,9), param(Rboard) do 
@@ -88,31 +69,6 @@ constraints_new(Rboard) :-
     %alldifferent(Col) 
   ),
   constraints_square(Rboard). %different numbers in each square
-
-constraints(Rboard,Cboard) :-
-	constraints_rows(Rboard),
-	constraints_cols(Cboard).
-	
-constraints_rows(Rboard) :-
-	(for(I,1,9), param(Rboard) do
-		(for(J,1,7,3), param(Rboard,I) do
-			Block is Rboard[I,J..J+2],
-			Block::[J..J+2]
-		),
-		Row is Rboard[I,1..9],
-		alldifferent(Row)
-	).
-	
-constraints_cols(Cboard) :-
-	(for(I,1,9), param(Cboard) do
-		Col is Cboard[I,1..9],
-		alldifferent(Col),
-		(for(J,1,7,3), param(Cboard,I) do
-			Cboard[I,J]::[1..3],
-			Cboard[I,J+1]::[4..6],
-			Cboard[I,J+2]::[7..9]
-		)
-	).
 
 constraints_square(Rboard) :-
   (for(I,1,9), param(Rboard)
@@ -140,15 +96,6 @@ channel(Board,Rboard) :-
     V2 is Rboard[K,B],
     #=(V, K, C),
     #=(V2, A, C)
-  ).
-	
-channel(Rboard,Rboard,Cboard) :-
-  (multifor([A,B,K],1,9), param(Rboard,Rboard,Cboard) do
-    V is Rboard[A,B],
-    Vr is Rboard[A,K],
-		Vc is Cboard[A,K],
-    #=(Vr, B, C),
-    #=(Vc, V, C)
   ).
 
 
