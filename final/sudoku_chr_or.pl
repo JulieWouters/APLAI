@@ -2,17 +2,20 @@
 :- consult('sudokus.pl').
 :- chr_constraint element/5, in/2, enum, enum/1, print_sud/1,value/3.
 
+% Solve all puzzles one after the other.
 solve :-
     solvep(1).
 solvep(19).
 solvep(X) :-
-    solve(X,firstfail),
+    time(solve(X,firstfail)),
     X1 is X + 1,
     solvep(X1).
 
+% Solve a given puzzle (name or number) with either firstfail or input order.
 solve(P, firstfail) :- puzzles(Sud,P), convert(Sud,1), enum(2), writeln(''), print_sud(1), writeln('').
 solve(P, inputorder) :- puzzles(Sud,P), convert(Sud,1), enum, writeln(''), print_sud(1), writeln('').
 
+% Convert puzzle to elements.
 convert([],10).
 convert([Row | Rest], I) :-
     INew is I + 1,
@@ -34,56 +37,36 @@ convert_row([Val | Rest], I, J) :-
     in(Val,[1,2,3,4,5,6,7,8,9]),
     convert_row(Rest,I,JNew).
 
-make_elements_row(_,0).
-make_elements_row(N,NRow) :-
-    make_elements_col(NRow,N),
-    NewRow is NRow - 1,
-    make_elements_row(N, NewRow).
-
-make_elements_col(_,0).
-make_elements_col(N,NCol) :-
-    block(N,NCol, BRow, BCol),
-    element(N,NCol,BRow, BCol, Var),
-    in(Var,[1,2,3,4,5,6,7,8,9]),
-    NewCol is NCol - 1,
-    make_elements_col(N,NewCol).
-
-make_values(_,0).
-make_values(N,NVal) :-
-    make_values_col(NVal,N),
-    NewVal is NVal - 1,
-    make_values(N, NewVal).
-
-make_values_col(_,0).
-make_values_col(N,NCol) :-
-    value(N,RowVar,NCol),
-    in(RowVar,[1,2,3,4,5,6,7,8,9]),
-    NewCol is NCol - 1,
-    make_values_col(N,NewCol).
-
+% Remove values in the same row/column/block from domain.
 element(_,J,_,_,X), element(_,J,_,_,Val) \ in(X,D) <=> nonvar(Val), member(Val,D), delete(D,Val,D2)| in(X,D2). 
 element(I,_,_,_,X), element(I,_,_,_,Val) \ in(X,D) <=> nonvar(Val), member(Val,D), delete(D,Val,D2)| in(X,D2). 
 element(_,_,BR,BC,X), element(_,_,BR,BC,Val) \ in(X,D) <=> nonvar(Val), member(Val,D), delete(D,Val,D2)| in(X,D2).
-
+% Backtrack if domain empty
 in(_,[])           <=> write('B'), fail.
+% If only one value left in domain, select this value.
 in(X,[N])          <=> X = N.
 
+% The row-block and column-block of given row and column.
 block(I, J, BRow, BCol) :-
     BRow is ((I - 1) // 3) + 1,
     BCol is ((J - 1) // 3) + 1.
 
+% Try out values in list.
 enum(Val, [X|R]) :-
     Val = X
     ;
     enum(Val,R).
 
+% Enum in order.
 enum \ in(Val,D) <=> enum(Val,D).
 
+% Enum from smallest domain to larger domains.
 enum(10) <=> true.
 enum(A) \ enum(B) <=> B >= A | true.
 enum(E), in(Val,D) <=> length(D,E) | enum(Val,D), enum(2).
 enum(E) <=> ENew is E + 1 | enum(ENew).
 
+% Print out solution
 print_sud(10) <=> true.
 print_sud(I) ==> I =:= 4 ; I =:= 7 | writeln('----------------------').
 print_sud(I), element(I,1,_,_,X1), element(I,2,_,_,X2), element(I,3,_,_,X3), element(I,4,_,_,X4), 

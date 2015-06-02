@@ -2,6 +2,7 @@
 :- consult('sudokus.pl').
 :- chr_constraint enum_value/1, value/3,phase1, phase2,print_sud_value/1, enum_value.
 
+% Solve all puzzles one after the other.
 solve :-
     solvep(1).
 solvep(19).
@@ -10,9 +11,11 @@ solvep(X) :-
     X1 is X + 1,
     solvep(X1).
 
+% Solve a given puzzle (name or number) with either firstfail or input order.
 solve(P, firstfail) :- puzzles(Sud,P), convert(Sud,1), phase1, enum_value(2), writeln(''), print_sud_value(1), writeln('').
 solve(P, inputorder) :- puzzles(Sud,P), convert(Sud,1), phase1, enum_value, writeln(''), print_sud_value(1), writeln('').
 
+% Convert puzzle to values.
 convert([],10).
 convert([Row | Rest], I) :-
     INew is I + 1,
@@ -36,10 +39,13 @@ make_values(I,J) :-
     value(4,[I],J), value(5,[I],J), value(6,[I],J), 
     value(7,[I],J), value(8,[I],J), value(9,[I],J). 
 
+% Remove value with multiple possible rows when there already exists a same value on the same column (with row already known)
 phase1, value(Val,I1,J) \ value(Val,I2,J) <=> number(I1), \+number(I2) | true.
+% Combine possible rows in one list (= the domain)
 phase1 \ value(Val,I1,J), value(Val,I2,J) <=> \+number(I1), \+number(I2), append(I1,I2,INew) | value(Val,INew,J).
 phase1 <=> phase2.
 
+% Constraints on values
 phase2, value(Val,I1,J1), value(Val,I2,J2) <=> number(I1),number(I2), block(I1,J1,BR,BC), block(I2,J2,BR,BC), I1 \== I2| write('B'), fail.
 phase2, value(Val,RowVal,J1) \ value(Val,D,J2) <=> \+number(D), number(RowVal), member(RowVal,D), same_block(RowVal,J1,D,J2), 
     remove_block_from_domain(RowVal,J1,D,J2,D2) | value(Val,D2,J2).
@@ -47,16 +53,19 @@ phase2, value(Val,RowVal,J1) \ value(Val,D,J2) <=> \+number(D), number(RowVal), 
     value(Val,D2,J2).  
 phase2, value(Val1,RowVal,J) \ value(Val2,D,J) <=> \+number(D), number(RowVal), Val1 \== Val2, member(RowVal,D), delete(D,RowVal,D2)| 
     value(Val2,D2,J).
+% Backtrack if domain empty
 phase2 \ value(_,[],_)      <=> write('B'), fail.
+% If only one value left in domain, select this value.
 phase2 \ value(Val,[I],J)   <=> value(Val,I,J). 
 
+% Check if the block of row I1 and column J1 is the same block as that of one row in the given list and column J2.
 same_block(I1,J1,[I2 | Rest], J2) :-
     (block(I1,J1,BR,BC),
     block(I2,J2,BR,BC))
     ;
     same_block(I1,J1,Rest,J2).
 
-% 
+% Remove all rows from the given list (of possible rows) which are in the same block as Row2 and column J2.
 remove_block_from_domain(_,_,[],_,[]).
 remove_block_from_domain(Row2, J2, [Row1 | R], J1, NewDomain) :-
     block(Row1,J1,BR1,BC1),

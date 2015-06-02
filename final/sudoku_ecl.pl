@@ -2,6 +2,7 @@
 :-lib(listut).
 :-compile("sudokus").
 
+% Convert the list of lists to an array
 convert(Board,GoodBoard) :-
     (for(I,0,8), 
     fromto([],List,[A|List],GoodList),
@@ -13,6 +14,7 @@ convert(Board,GoodBoard) :-
     ),
     array_list(GoodBoard,GoodList).
 
+% Solve given Sudoku using Method as heuristic and returning amount of backtracks B
 solve(P,B,Method) :- solve([],P,B,Method).
 solve([],P,B, Method) :- solve([new,original],P,B, Method).
 solve(Options,P,B, Method) :-
@@ -21,6 +23,7 @@ solve(Options,P,B, Method) :-
     sudoku(Board,Rboard,B, Options, Method), 
     print_board(Board).
 
+% Constrain variables and search
 sudoku(Board,Rboard, B,Options, Method) :-
     constraints(Board,Rboard,Options),
     (member(new,Options) -> 
@@ -29,8 +32,8 @@ sudoku(Board,Rboard, B,Options, Method) :-
       ic:search(Board,0,Method,indomain,complete,[backtrack(B)])
     ).
 
+% Constraints on variables
 constraints(Board,Rboard,Options) :-
-  %dim(Board,[9,9]), 
   dim(Rboard,[9,9]),
   Board :: [1..9], 
   Rboard :: [1..9],
@@ -46,7 +49,8 @@ constraints(Board,Rboard,Options) :-
     true
   ).
 	
-constraints_original(Board) :- %constraints for the original viewpoint
+%constraints for the original viewpoint
+constraints_original(Board) :- 
   (for(I,1,9), param(Board) do 
       Row is Board[I,1..9], 
       Col is Board[1..9,I], 
@@ -56,8 +60,7 @@ constraints_original(Board) :- %constraints for the original viewpoint
   (multifor([J,K],1,7,3), param(Board) do 
     Block is Board[J..J+2,K..K+2], 
     flatten(Block, BlockList), 
-    alldifferent(BlockList)  %,
-    %new_constraints(BlockList,I,J,Board)
+    alldifferent(BlockList)
   ).
 
 %constraints for our new viewpoint
@@ -66,10 +69,10 @@ constraints_new(Rboard) :-
     Row is Rboard[I,1..9], 
     Col is Rboard[1..9,I], 
     alldifferent(Row)
-    %alldifferent(Col) 
   ),
-  constraints_square(Rboard). %different numbers in each square
+  constraints_square(Rboard). 
 
+%different numbers in each square
 constraints_square(Rboard) :-
   (for(I,1,9), param(Rboard)
   do
@@ -98,7 +101,7 @@ channel(Board,Rboard) :-
     #=(V2, A, C)
   ).
 
-
+% Print the solution
 print_board(Board) :-
   (foreachelem(El,Board,[_,J]) do 
     ( J =:= 1 -> nl ; true ), write(" "), ( var(El) -> write("_") ; write(El) ) 
